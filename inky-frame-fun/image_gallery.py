@@ -1,19 +1,19 @@
 import os
 import gc
 import random
+import time
 from urllib import urequest
 
+import jpegdec
+from machine import Pin, SPI
+from network_manager import NetworkManager
 from pimoroni import ShiftRegister
 from picographics import PicoGraphics, DISPLAY_INKY_FRAME
-from machine import Pin, SPI
-import jpegdec
-from network_manager import NetworkManager
+import sdcard
 import uasyncio
+import uos
 
 import WIFI_CONFIG
-
-import sdcard
-import uos
 
 def setup_sd_card():
     sd_spi = SPI(0, sck=Pin(18, Pin.OUT), mosi=Pin(19, Pin.OUT), miso=Pin(16, Pin.OUT))
@@ -37,23 +37,21 @@ def load_text_from_url(url):
     connection.close()
     return contents.strip().decode("utf-8")
 
-def download_image():
-    # url = "http://placekitten.com/600/448"
-    url = "{}/bichinho.jpg".format(WIFI_CONFIG.IMAGES_URL)
+def download_image(filename):
+    url = "{}/{}".format(WIFI_CONFIG.IMAGES_URL, filename)
 
-    print("loading image from {}".format(url))
+    print("downloading image from {}".format(url))
 
     socket = urequest.urlopen(url)
     data = bytearray(1024)
-    with open(FILENAME, "wb") as f:
+    path_on_sd = f"/sd/{filename}"
+    with open(path_on_sd, "wb") as f:
         while True:
             if socket.readinto(data) == 0:
                 break
             f.write(data)
     socket.close()
-    gc.collect()
-
-    jpeg = jpegdec.JPEG(display)
+    url = None
     gc.collect()
 
 display = PicoGraphics(display=DISPLAY_INKY_FRAME)
@@ -70,21 +68,42 @@ hold_vsys_en_pin.value(True)
 # Create a new JPEG decoder for our PicoGraphics
 j = jpegdec.JPEG(display)
 
+print("Created jpegdec")
+print(gc.mem_free())
+
 def display_image(filename):
+    path_on_sd = f"/sd/{filename}"
+    
+    print(f"Opening {path_on_sd}")
+    
     activity_led.on()
-    j.open_file(filename)
+    j.open_file(path_on_sd)
     j.decode(0, 0, jpegdec.JPEG_SCALE_FULL)
     display.update()
     activity_led.off()
     gc.collect()
+
+def download_images():
+    for image_file in images_list:
+        download_image(image_file)
     
+def show_slideshow():
+    while True:
+        for image_file in images_list:
+            display_image(image_file)
+            time.sleep(60)
 
 setup_sd_card()
 connect_network()
+
+print("Set up SD card and network")
+print(gc.mem_free())
+
 # download_image()
 # display_image(FILENAME)
 
-print("Loaded innit")
-
 images_list = load_text_from_url("{}/list.txt".format(WIFI_CONFIG.IMAGES_URL)).split("\n")
 print([image_file for image_file in images_list])
+
+print("Images downloaded")
+print(gc.mem_free())
