@@ -3,3 +3,5 @@
 SSID = "<your SSID here>"
 PSK = "<your password here>"
 COUNTRY = "GB"
+
+IMAGES_URL="<wherever>"

@@ -32,8 +32,10 @@ def connect_network():
 FILENAME = "/sd/placekitten.jpg"
 
 def load_placekitten():
-    url = "http://placekitten.com/600/448"
-    # url = "http://www.cdpjenkins.com/img/bichinho.jpg"
+    # url = "http://placekitten.com/600/448"
+    url = "{}/bichinho.jpg".format(WIFI_CONFIG.IMAGES_URL)
+
+    print("loading image from {}".format(url))
 
     socket = urequest.urlopen(url)
     data = bytearray(1024)
