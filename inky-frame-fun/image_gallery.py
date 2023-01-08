@@ -31,7 +31,13 @@ def connect_network():
 
 FILENAME = "/sd/placekitten.jpg"
 
-def load_placekitten():
+def load_text_from_url(url):
+    connection = urequest.urlopen(url)
+    contents = connection.read()
+    connection.close()
+    return contents.strip().decode("utf-8")
+
+def download_image():
     # url = "http://placekitten.com/600/448"
     url = "{}/bichinho.jpg".format(WIFI_CONFIG.IMAGES_URL)
 
@@ -51,10 +57,6 @@ def load_placekitten():
     gc.collect()
 
 display = PicoGraphics(display=DISPLAY_INKY_FRAME)
-
-setup_sd_card()
-connect_network()
-load_placekitten()
 
 # and the activity LED
 activity_led = Pin(6, Pin.OUT)
@@ -76,4 +78,13 @@ def display_image(filename):
     activity_led.off()
     gc.collect()
     
-display_image(FILENAME)
+
+setup_sd_card()
+connect_network()
+# download_image()
+# display_image(FILENAME)
+
+print("Loaded innit")
+
+images_list = load_text_from_url("{}/list.txt".format(WIFI_CONFIG.IMAGES_URL)).split("\n")
+print([image_file for image_file in images_list])
