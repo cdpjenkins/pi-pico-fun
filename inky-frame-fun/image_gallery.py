@@ -13,7 +13,7 @@ import sdcard
 import uasyncio
 import uos
 
-import WIFI_CONFIG
+import WIFI_CONFIG = 300
 
 def enable_vsys_hold_to_prevent_sleep():
     HOLD_VSYS_EN_PIN = 2
@@ -75,13 +75,16 @@ def display_image(filename):
     display.update()
     activity_led.off()
     gc.collect()
-    
+
 def show_slideshow():
     while True:
         for image_file in images_list:
             display_image(image_file)
-            time.sleep(60)
+            time.sleep(TIME_BETWEEN_IMAGES)
 
+def download_image_list():
+    images_url = WIFI_CONFIG.IMAGES_URL
+    return load_text_from_url(f"{images_url}/list.txt").split("\n")
 
 display = PicoGraphics(display=DISPLAY_INKY_FRAME)
 j = jpegdec.JPEG(display)
@@ -90,9 +93,7 @@ activity_led = Pin(6, Pin.OUT)
 enable_vsys_hold_to_prevent_sleep()
 setup_sd_card()
 connect_network()
+images_list = download_image_list()
 
-images_list = load_text_from_url("{}/list.txt".format(WIFI_CONFIG.IMAGES_URL)).split("\n")
-print([image_file for image_file in images_list])
-
-print("Images downloaded")
-print(gc.mem_free())
+download_images()
+show_slideshow()
