@@ -13,7 +13,9 @@ import sdcard
 import uasyncio
 import uos
 
-import WIFI_CONFIG = 300
+import WIFI_CONFIG
+
+TIME_BETWEEN_IMAGES = 300
 
 def enable_vsys_hold_to_prevent_sleep():
     HOLD_VSYS_EN_PIN = 2
@@ -44,7 +46,7 @@ def load_text_from_url(url):
 def download_image(filename):
     url = "{}/{}".format(WIFI_CONFIG.IMAGES_URL, filename)
 
-    print("downloading image from {}".format(url))
+    print(f"downloading image from {url}")
 
     socket = urequest.urlopen(url)
     data = bytearray(1024)
