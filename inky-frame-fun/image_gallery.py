@@ -1,6 +1,5 @@
 import os
 import gc
-import random
 import time
 from urllib import urequest
 
@@ -15,7 +14,7 @@ import uos
 
 import WIFI_CONFIG
 
-TIME_BETWEEN_IMAGES = 300
+TIME_BETWEEN_IMAGES_MINUTES = 20
 
 def enable_vsys_hold_to_prevent_sleep():
     HOLD_VSYS_EN_PIN = 2
@@ -33,6 +32,7 @@ def status_handler(mode, status, ip):
     print(mode, status, ip)
     
 def connect_network():
+    print("Trying to connect to the WiFi network...")
     network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
     uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
     gc.collect()
@@ -82,7 +82,7 @@ def show_slideshow():
     while True:
         for image_file in images_list:
             display_image(image_file)
-            time.sleep(TIME_BETWEEN_IMAGES)
+            time.sleep(TIME_BETWEEN_IMAGES_MINUTES * 60)
 
 def download_image_list():
     images_url = WIFI_CONFIG.IMAGES_URL
@@ -97,5 +97,5 @@ setup_sd_card()
 connect_network()
 images_list = download_image_list()
 
-download_images()
+# download_images()
 show_slideshow()
